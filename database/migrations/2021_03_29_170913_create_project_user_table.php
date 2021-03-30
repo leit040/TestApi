@@ -17,8 +17,8 @@ class CreateProjectUserTable extends Migration
             $table->id();
             $table->foreignId('project_id');
             $table->foreignId('user_id');
-            $table->foreign('user_id')->references('id')->on('projects')->cascadeOnDelete();
-            $table->foreign('project_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('projects');
+            $table->foreign('project_id')->references('id')->on('users');
 
         });
     }

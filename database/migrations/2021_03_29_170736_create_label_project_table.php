@@ -17,8 +17,8 @@ class CreateLabelProjectTable extends Migration
             $table->id();
             $table->foreignId('label_id');
             $table->foreignId('project_id');
-            $table->foreign('label_id')->references('id')->on('labels')->cascadeOnDelete();
-            $table->foreign('project_id')->references('id')->on('projects')->cascadeOnDelete();
+            $table->foreign('label_id')->references('id')->on('labels');
+            $table->foreign('project_id')->references('id')->on('projects');
 
         });
     }
