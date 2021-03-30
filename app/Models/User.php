@@ -41,14 +41,22 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-public function projects(){
+public function projects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+{
     return $this->belongsToMany(Project::class);
 }
 
-public function labels(){
+    public function projectsMorph(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Project::class,'projectable');
+    }
+
+public function labels(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+{
     return $this->belongsToMany(Label::class);
 }
-public function country(){
+public function country(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+{
     return $this->belongsTo(Country::class);
 }
 

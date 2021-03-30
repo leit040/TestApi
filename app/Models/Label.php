@@ -11,10 +11,12 @@ class Label extends Model
 protected $fillable=[
     'name'
 ];
-public function user(){
+public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+{
     return $this->belongsTo(User::class);
 }
-    public function projects(){
-        return $this->belongsToMany(Project::class);
+    public function projects(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Project::class,'projectable');
     }
 }

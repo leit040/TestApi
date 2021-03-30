@@ -47,9 +47,9 @@ class DatabaseSeeder extends Seeder
             $label->save();
         });
 
-        foreach ($projects as $project){
-         $project->users()->attach($users->random(rand(2,5))->pluck('id'));
-         $project->labels()->attach($labels->random(rand(3,7))->pluck('id'));
+        foreach ($users as $user){
+         $user->projects()->attach($projects->random(rand(2,5))->pluck('id'));
+         //$project->labels()->attach($labels->random(rand(3,7))->pluck('id'));
 
         }
 

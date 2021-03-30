@@ -14,11 +14,13 @@ class Country extends Model
 
     ];
 
-    public function users(){
+    public function users(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
         return $this->belongsToMany(User::class);
 
     }
-    public function continent(){
+    public function continent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
 
         return $this->belongsTo(Continent::class);
     }
