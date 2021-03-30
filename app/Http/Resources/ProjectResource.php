@@ -19,7 +19,7 @@ class ProjectResource extends JsonResource
             'name'=>$this->name,
             'user'=>new UserResource(User::find($this->user_id)),
             'users'=>UserResource::collection($this->users),
-            'labels'=>$this->labels,
+            'labels'=>LabelResource::collection($this->labels),
         ];
     }
 }
