@@ -5,16 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LabelCollection;
 use App\Models\Label;
+use App\Models\Project;
 use Illuminate\Http\Request;
+use League\Flysystem\SafeStorage;
 
 class LabelController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return LabelCollection
      */
-    public function index()
+    public function index(): LabelCollection
     {
         return new LabelCollection(Label::all());
     }
@@ -23,11 +25,17 @@ class LabelController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
-        //
+        $data = $request->validate([
+            'name'=> ['required', 'unique:labels'],
+            'user_id'=>['required','exists:App\Models\User,id']
+        ]);
+         Label::create($data);
+        return response()->json(['status'=>'Ok','message'=>'Label saved']);
+
     }
 
     /**
@@ -46,21 +54,32 @@ class LabelController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Label  $label
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, Label $label)
+    public function update(Request $request, Label $label): \Illuminate\Http\JsonResponse
     {
-        //
+        $data = $request->validate([
+            'name'=> ['required', 'unique:labels'],
+            'user_id'=>['required','exists:App\Models\User,id']
+        ]);
+        $label->update($data);
+        return response()->json(['status'=>'Ok','message'=>'Label updated']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Label  $label
+     * @param \App\Models\Label $label
      * @return \Illuminate\Http\Response
+     * @throws \Exception
      */
     public function destroy(Label $label)
-    {
-        //
+    {   $label->projects()->detach();
+        $label->delete();
+
+    }
+
+    public function link(Project $projects){
+
     }
 }
