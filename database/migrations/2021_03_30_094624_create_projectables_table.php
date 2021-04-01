@@ -29,6 +29,7 @@ class CreateProjectablesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('projectable');
+        Schema::disableForeignKeyConstraints('projectables');
+        Schema::dropIfExists('projectables');
     }
 }

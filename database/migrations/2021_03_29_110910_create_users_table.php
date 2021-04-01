@@ -20,6 +20,7 @@ class CreateUsersTable extends Migration
             $table->foreignId('country_id');
             $table->foreign('country_id')->references('id')->on('countries');
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
             $table->rememberToken();
             $table->timestamps();
         });

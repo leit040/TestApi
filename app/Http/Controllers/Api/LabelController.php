@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LabelCollection;
+use App\Http\Resources\ProjectCollection;
 use App\Models\Label;
 use App\Models\Project;
 use Illuminate\Http\Request;
@@ -27,13 +28,15 @@ class LabelController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request): \Illuminate\Http\JsonResponse
+    public function store(\Illuminate\Http\Request $request): \Illuminate\Http\JsonResponse
     {
-        $data = $request->validate([
-            'name'=> ['required', 'unique:labels'],
+
+           $data = $request->validate([
+
+            'name'=> ['required'],
             'user_id'=>['required','exists:App\Models\User,id']
         ]);
-         Label::create($data);
+        Label::create($data);
         return response()->json(['status'=>'Ok','message'=>'Label saved']);
 
     }
@@ -79,7 +82,9 @@ class LabelController extends Controller
 
     }
 
-    public function link(Project $projects){
-
+    public function link(ProjectCollection $projects,Label $label){
+     foreach ($projects as $project){
+         $label->projects()->attach($project->id);
+     }
     }
 }
