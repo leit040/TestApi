@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserCollection;
 use App\Models\User;
+use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -163,14 +164,15 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
        foreach ($request->all() as $data) {
+          // dd("Id is ...".$data['id']);
 
             $validator = Validator::make($data, [
                     'id'=>['required', 'exists:users:id'],
                     'name' => ['required', 'min:10'],
-                    'email' => ['required', 'unique:users,email', 'email:rfc,dns'],
+                    'email' => ['required', 'unique:users,email',$data['id'], 'email:rfc,dns'],
                     'password' => ['required', 'min:8',],
                     'country_id' => ['required', 'exists:countries:id']
 
@@ -178,10 +180,11 @@ class UserController extends Controller
 
             );
 
-            $data['password'] = Hash::make($data['password']);
        $data['password'] = Hash::make($data['password']);
+        $user = User::find($data['id']);
         $user->update($data);}
-        return response(['status:'=>'ok']);
+
+       return response(['status:'=>'ok']);
     }
 
     /**

@@ -9,7 +9,6 @@ class Continent extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'country_code',
-        'continent_code'
+       'continent_code'
     ];
 }

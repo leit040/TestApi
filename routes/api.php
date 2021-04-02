@@ -22,6 +22,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('/projects',[\App\Http\Controllers\Api\ProjectController::class,'index']);
 Route::apiResource('label',\App\Http\Controllers\Api\LabelController::class);
 Route::apiResource('user',\App\Http\Controllers\Api\UserController::class);
-
+Route::put('/users',[\App\Http\Controllers\Api\UserController::class,'update']);
 
 
