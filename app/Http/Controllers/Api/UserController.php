@@ -4,117 +4,49 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserCollection;
+use App\Mail\VerifyEmail;
 use App\Models\User;
+use DateTime;
 use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @param null $name
-     * @param null $email
-     * @param null $isVerified
-     * @param null $country_id
+     * @param Request $request
      * @return UserCollection
      */
-    public function index($name = null,$email=null,$isVerified=null,$country_id=null):UserCollection
-    {
-
-
-      if($name!=null && $email!=null && $isVerified!=null && $country_id!=null)
+      public function index(Request $request): UserCollection
       {
-            //ALL
-          $users = User::where('email',$email)->where('name',$name)->where('is_verified','!=',null)->where('country_id',$country_id)->get();
-          return new UserCollection($users);
+          $data = $request->all();
+
+          if (isset($data['filter'])) {
+                  if (array_key_exists('is_verified', $data['filter'])) {
+                  $users = User::where('email_verified_at', '!=', null)->get();
+                  unset($data['filter']['is_verified']);
+              } else {
+                  $users = User::all();
+              }
+
+
+              if (count($data['filter']) > 0) {
+                  {
+                      foreach ($data['filter'] as $filter => $option) {
+                          $users = $users->where($filter, $option);
+                      }
+                  }
+
+              }
+              return new UserCollection($users);
+          }
+          return new UserCollection(User::all());
       }
-        if($name!=null && $email!=null && $isVerified!=null)
-        {
-            //3 FIRST
-            $users = User::where('email',$email)->where('name',$name)->where('is_verified','!=',null)->get();
-            return new UserCollection($users);
-        }
-
-        if($name!=null && $email!=null)
-        {
-            //2 FIRST
-            $users = User::where('email',$email)->where('name',$name)->get();
-            return new UserCollection($users);
-        }
-
-        if($name!=null)
-        {
-            //ONLY ONE FIRST
-            $users = User::where('email',$email)->get();
-            return new UserCollection($users);
-
-        }
-
-        if($email!=null)
-        {
-            //ONLY second
-            $users = User::where('name',$name)->get();
-            return new UserCollection($users);
-
-        }
-
-        if($isVerified!=null)
-        {
-            //ONLY third
-            $users = User::where('is_verified','!=',null)->get();
-            return new UserCollection($users);
-
-        }
-
-        if($country_id!=null)
-        {
-            //ONLY fourth
-            $users = User::where('country_id',$country_id)->get();
-            return new UserCollection($users);
-        }
-
-        if($name!=null && $email!=null && $isVerified!=null && $country_id!=null)
-        {
-            //FIRST AND LAST
-            $users = User::where('email',$email)->where('country_id',$country_id)->get();
-            return new UserCollection($users);
-        }
-        if($name!=null && $email!=null && $isVerified!=null && $country_id!=null)
-        {
-            //FIRST AND THIRD
-            $users = User::where('email',$email)->where('is_verified')->get();
-            return new UserCollection($users);
-        }
-
-        if($email!=null && $isVerified!=null)
-        {
-            //SECOND AND THIRD
-            $users = User::where('email',$email)->where('is_verified')->get();
-            return new UserCollection($users);
-        }
-
-        if($email!=null && $isVerified!=null && $country_id!=null)
-        {
-            //forth, third and second
-            $users = User::where('name',$name)->where('is_verified','!=',null)->where('country_id',$country_id)->get();
-            return new UserCollection($users);
-        }
-
-        if($name!=null && $email!=null && $isVerified!=null && $country_id!=null)
-        {
-            //fourth and second
-            $users = User::where('name',$name)->where('country_id',$country_id)->get();
-            return new UserCollection($users);
-        }
-
-        return new UserCollection(User::all());
-
-
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -132,30 +64,20 @@ class UserController extends Controller
                    'email' => ['required', 'unique:users,email', 'email:rfc,dns'],
                    'password' => ['required', 'min:8',],
                    'country_id' => ['required', 'exists:countries:id']
-
                ]
-
            );
 
            $data['password'] = Hash::make($data['password']);
-
-           User::create($data);
+            $data['verify_token'] = Str::random(45);
+           $user = User::create($data);
+            $queue = new \App\Jobs\VerifyEmail($user);
+            $queue->onQueue('verifyEmail')->dispatch($user);
        }
     return response(['status:'=>'ok']);
 
-
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
-     */
-    public function show(User $user)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
@@ -167,7 +89,6 @@ class UserController extends Controller
     public function update(Request $request)
     {
        foreach ($request->all() as $data) {
-          // dd("Id is ...".$data['id']);
 
             $validator = Validator::make($data, [
                     'id'=>['required', 'exists:users:id'],
@@ -193,8 +114,25 @@ class UserController extends Controller
      * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(User $user)
+    public function destroy(Request $request)
     {
-        $user->delete();
+        $data=$request->json();
+            foreach ($data as $id){
+            $user=User::find($id);
+            $user->delete();
+                    }
+
     }
+
+
+public function verify($user, Request $request){
+    $user=User::find($user);
+       $data = $request->only('token');
+          if($user->verify_token===$data['token']){
+          $user->email_verified_at = now();
+          $user->save();
+
+      }
+
+}
 }

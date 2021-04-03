@@ -20,7 +20,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'country_id'
+        'country_id',
+        'verify_token'
     ];
 
     /**
@@ -41,7 +42,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-public function projects(){
+    /**
+     * @var mixed
+     */
+
+
+    public function projects(){
     return $this->belongsToMany(Project::class);
 }
 
@@ -51,7 +57,6 @@ public function labels(){
 public function country(){
     return $this->belongsTo(Country::class);
 }
-
 
 
 }
