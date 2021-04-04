@@ -15,10 +15,11 @@ class VerifyEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 protected $user;
+
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param User $user
      */
     public function __construct(User $user)
     {

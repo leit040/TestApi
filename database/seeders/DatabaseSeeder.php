@@ -36,15 +36,15 @@ class DatabaseSeeder extends Seeder
 
 
         $countries = Country::all();
-        $users = \App\Models\User::factory(100)->make(['country_id' => null])->each(function ($user) use ($countries) {
+        $users = \App\Models\User::factory(25)->make(['country_id' => null])->each(function ($user) use ($countries) {
             $user->country_id = $countries->random()->id;
             $user->save();
         });
-        $projects = Project::factory(10)->make(['user_id' => null])->each(function ($project) use ($users) {
+        $projects = Project::factory(100)->make(['user_id' => null])->each(function ($project) use ($users) {
             $project->user_id = $users->random()->id;
             $project->save();
         });
-        $labels = Label::factory(10)->make(['user_id' => null])->each(function ($label) use ($users) {
+        $labels = Label::factory(200)->make(['user_id' => null])->each(function ($label) use ($users) {
             $label->user_id = $users->random()->id;
             $label->save();
         });
