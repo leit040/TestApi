@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProjectCollection;
+use App\Models\Continent;
 use App\Models\Project;
+use App\Models\User;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ProjectController extends Controller
@@ -16,24 +20,40 @@ class ProjectController extends Controller
      * @param Request $request
      * @return ProjectCollection
      */
-    public function index(Request $request)
+    public function index(Request $request): ProjectCollection
     {
-        $data = $request->all();
-        if (isset($data['filter'])){
+       $query = Project::query()->select('projects.*');
+       if($request->has('email')){
+           $query->join('users','projects.user_id','=','users.id')
+               ->where('email','=',$request->get('email'));
 
+       }
+
+        if($request->has('labels')){
+            $query->join('label_project','projects.id','=','label_project.project_id')
+                ->whereIn('label_id',$request->get('labels'));
 
         }
 
-        return new ProjectCollection(Project::all());
+        if($request->has('continent'))
+        {
+            $query->join('users','projects.user_id','=','users.id')->
+            join('countries','users.country_id','=','countries.id')->join('continents',
+                'countries.continent_id','=','continents.id')->
+            where('continents.id','=',$request->get('continent'));
+
+        }
+         return new ProjectCollection($query->get());
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request)
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $data_all = $request->all();
         foreach ($data_all as $data) {
@@ -49,29 +69,26 @@ class ProjectController extends Controller
 
 
         }
-        return response(['status:'=>'ok']);
+        return response()->json(['status'=>'Ok','message'=>'Projects saved']);
     }
 
+public function linkToUsers(Request $request){
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Project  $project
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Project $project)
-    {
-        //
-    }
+        foreach($request->all() as $data){
+            Project::findOrFail($data['project'])->linked_users()->syncWithoutDetaching($data['users']);
 
-    /**
+        }
+
+}
+       /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Project  $project
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Project $project
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function update(Request $request)
+    public function update(Request $request): \Illuminate\Http\JsonResponse
     {
         foreach ($request->all() as $data) {
 
@@ -84,7 +101,7 @@ class ProjectController extends Controller
             $project = Project::find($data['id']);
             $project->update($data);
         }
-return response(['status:'=>'ok']);
+        return response()->json(['status'=>'Ok','message'=>'Projects saved']);
 
 
     }
@@ -92,16 +109,16 @@ return response(['status:'=>'ok']);
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Project  $project
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): \Illuminate\Http\JsonResponse
     {
         $data=$request->json();
         foreach ($data as $id){
             $project=Project::find($id);
             $project->delete();
         }
-        return response(['status:'=>'ok']);
+        return response()->json(['status'=>'Ok','message'=>'Projects deleted']);
     }
 }

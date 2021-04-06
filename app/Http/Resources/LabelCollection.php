@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\User;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class LabelCollection extends ResourceCollection
@@ -16,4 +17,6 @@ class LabelCollection extends ResourceCollection
     {
         return parent::toArray($request);
     }
+
+
 }

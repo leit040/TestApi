@@ -14,16 +14,19 @@ class Project extends Model
         'user_id'
     ];
 
-    public function user(){
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function users(){
+    public function linked_users(): BelongsToMany
+    {
 
         return $this->belongsToMany(User::class);
     }
 
-public function labels(){
+public function labels(): BelongsToMany
+{
         return $this->belongsToMany(Label::class);
 }
 

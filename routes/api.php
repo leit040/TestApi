@@ -23,7 +23,15 @@ Route::get('/projects',[\App\Http\Controllers\Api\ProjectController::class,'inde
 Route::put('/projects',[\App\Http\Controllers\Api\ProjectController::class,'update']);
 Route::delete('/projects',[\App\Http\Controllers\Api\ProjectController::class,'destroy']);
 Route::post('/projects',[\App\Http\Controllers\Api\ProjectController::class,'store']);
-Route::apiResource('label',\App\Http\Controllers\Api\LabelController::class);
+Route::post('/projects-link-users',[\App\Http\Controllers\Api\ProjectController::class,'linkToUsers']);
+
+Route::get('/labels',[\App\Http\Controllers\Api\LabelController::class,'index']);
+Route::put('/labels',[\App\Http\Controllers\Api\LabelController::class,'update']);
+Route::delete('/labels',[\App\Http\Controllers\Api\LabelController::class,'destroy']);
+Route::post('/labels',[\App\Http\Controllers\Api\LabelController::class,'store']);
+Route::post('/labels-link-projects',[\App\Http\Controllers\Api\LabelController::class,'linkToProjects']);
+
+
 Route::put('/users',[\App\Http\Controllers\Api\UserController::class,'update']);
 Route::delete('/users',[\App\Http\Controllers\Api\UserController::class,'destroy']);
 Route::post('/users',[\App\Http\Controllers\Api\UserController::class,'store']);

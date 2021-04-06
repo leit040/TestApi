@@ -24,7 +24,7 @@ class UserController extends Controller
      * @param Request $request
      * @return UserCollection
      */
-      public function index(Request $request)
+      public function index(Request $request): UserCollection
       {
         $data = $request->all();
 
@@ -45,13 +45,15 @@ class UserController extends Controller
           }
           return new UserCollection(User::all());
       }
+
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): \Illuminate\Http\Response
+    public function store(Request $request): \Illuminate\Http\JsonResponse
     {
 
        $data_all=$request->all();
@@ -71,20 +73,20 @@ class UserController extends Controller
             $queue = new \App\Jobs\VerifyEmail($user);
             $queue->onQueue('verifyEmail')->dispatch($user);
        }
-    return response(['status:'=>'ok']);
+        return response()->json(['status'=>'Ok','message'=>'Users saved']);
 
     }
-
 
 
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\User $user
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Validation\ValidationException
      */
-    public function update(Request $request)
+    public function update(Request $request): \Illuminate\Http\JsonResponse
     {
        foreach ($request->all() as $data) {
 
@@ -104,23 +106,23 @@ class UserController extends Controller
         $user->update($data);
        }
 
-       return response(['status:'=>'ok']);
+        return response()->json(['status'=>'Ok','message'=>'Users saved']);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): \Illuminate\Http\JsonResponse
     {
         $data=$request->json();
             foreach ($data as $id){
             $user=User::find($id);
             $user->delete();
                     }
-
+        return response()->json(['status'=>'Ok','message'=>'Users deleted']);
     }
 
 
@@ -132,6 +134,6 @@ public function verify($user, Request $request){
           $user->save();
 
       }
-    return response(['status:'=>'ok']);
+    return response()->json(['status'=>'Ok','message'=>'User verified']);
 }
 }
