@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
         });
 
         foreach ($projects as $project) {
-            $project->users()->attach($users->random(rand(2, 5))->pluck('id'));
+            $project->linkedUsers()->attach($users->random(rand(2, 5))->pluck('id'));
             $project->labels()->attach($labels->random(rand(3, 7))->pluck('id'));
 
         }

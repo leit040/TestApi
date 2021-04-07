@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 });*/
 
 //Route::get('/labels',[\App\Http\Controllers\Api\LabelController::class,'index']);
+Route::get('/project/{project}',[\App\Http\Controllers\Api\ProjectController::class,'show']);
 Route::get('/projects',[\App\Http\Controllers\Api\ProjectController::class,'index']);
 Route::put('/projects',[\App\Http\Controllers\Api\ProjectController::class,'update']);
 Route::delete('/projects',[\App\Http\Controllers\Api\ProjectController::class,'destroy']);

@@ -47,14 +47,17 @@ class User extends Authenticatable implements MustVerifyEmail
      */
 
 
-    public function projects(){
+    public function projects(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
     return $this->belongsToMany(Project::class);
 }
 
-public function labels(){
+public function labels(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+{
     return $this->belongsToMany(Label::class);
 }
-public function country(){
+public function country(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+{
     return $this->belongsTo(Country::class);
 }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProjectCollection;
+use App\Http\Resources\ProjectResource;
 use App\Models\Continent;
 use App\Models\Project;
 use App\Models\User;
@@ -22,7 +23,10 @@ class ProjectController extends Controller
      */
     public function index(Request $request): ProjectCollection
     {
-       $query = Project::query()->select('projects.*');
+
+
+       $query = Project::query()->select('projects.*')->join('project_user','project_user.project_id','=','project.id')->where('project_user.user_id', '=', auth()->id());
+
        if($request->has('email')){
            $query->join('users','projects.user_id','=','users.id')
                ->where('email','=',$request->get('email'));
@@ -43,8 +47,20 @@ class ProjectController extends Controller
             where('continents.id','=',$request->get('continent'));
 
         }
-         return new ProjectCollection($query->get());
+
+
+        return new ProjectCollection($query->get());
     }
+
+    public function show(Request $request,Project $project){
+
+        if ($request->user()->cannot('view', $project)) {
+            abort(403);
+        }
+        return new ProjectResource($project);
+
+    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -65,7 +81,8 @@ class ProjectController extends Controller
             )->validate();
 
 
-        Project::create($data);
+        $project = Project::create($data);
+        $project->linked_users()->attach($data['user_id']);
 
 
         }
@@ -99,6 +116,9 @@ public function linkToUsers(Request $request){
             ])->validate();
 
             $project = Project::find($data['id']);
+            if($request->user()->cannot('update',$project)){
+                abort(403);
+            }
             $project->update($data);
         }
         return response()->json(['status'=>'Ok','message'=>'Projects saved']);
@@ -117,6 +137,9 @@ public function linkToUsers(Request $request){
         $data=$request->json();
         foreach ($data as $id){
             $project=Project::find($id);
+            if($request->user()->cannot('delete',$project)){
+                abort(403);
+            }
             $project->delete();
         }
         return response()->json(['status'=>'Ok','message'=>'Projects deleted']);

@@ -22,6 +22,8 @@ class LabelController extends Controller
     public function index(Request $request): LabelCollection
     {
         $query = Label::query();
+
+
         if($request->has('email')){
          $query->join('users','labels.user_id','=','users.id',)
              ->where('email','=',$request->get('email'));

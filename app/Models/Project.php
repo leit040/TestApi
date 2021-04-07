@@ -19,7 +19,7 @@ class Project extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function linked_users(): BelongsToMany
+    public function linkedUsers(): BelongsToMany
     {
 
         return $this->belongsToMany(User::class);
