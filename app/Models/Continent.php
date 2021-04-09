@@ -12,12 +12,14 @@ class Continent extends Model
        'continent_code'
     ];
 
-public function users(){
+public function users(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+{
     return $this->hasManyThrough(User::class,Country::class);
 
 }
 
-public function countries(){
+public function countries(): \Illuminate\Database\Eloquent\Relations\HasMany
+{
     return $this->hasMany(Country::class);
 }
 

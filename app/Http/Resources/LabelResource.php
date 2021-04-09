@@ -16,6 +16,7 @@ class LabelResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'id'=>$this->id,
             'name'=>$this->name,
             'user'=>new UserResource(User::findOrFail($this->user_id)),
         ];

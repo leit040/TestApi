@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -24,27 +25,28 @@ class UserController extends Controller
      * @param Request $request
      * @return UserCollection
      */
-      public function index(Request $request): UserCollection
-      {
+    public function index(Request $request): UserCollection
+    {
         $data = $request->all();
-
-                 if (isset($data['filter'])) {
-                  if (array_key_exists('is_verified', $data['filter'])) {
-                  $query = User::query()->where('email_verified_at', '!=', null);
-                  unset($data['filter']['is_verified']);
-              }else{$query=User::query();}
-              if (count($data['filter']) > 0) {
-                  {
-                      foreach ($data['filter'] as $filter => $option) {
-                          $query->where($filter, $option);
-                      }
-                  }
-              }
-              $users = $query->get();
-              return  new UserCollection($users);
-          }
-          return new UserCollection(User::all());
-      }
+        if (isset($data['filter'])) {
+            if (array_key_exists('is_verified', $data['filter'])) {
+                $query = User::query()->where('email_verified_at', '!=', null);
+                unset($data['filter']['is_verified']);
+            } else {
+                $query = User::query();
+            }
+            if (count($data['filter']) > 0) {
+                {
+                    foreach ($data['filter'] as $filter => $option) {
+                        $query->where($filter, $option);
+                    }
+                }
+            }
+            $users = $query->get();
+            return new UserCollection($users);
+        }
+        return new UserCollection(User::all());
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -56,24 +58,24 @@ class UserController extends Controller
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
 
-       $data_all=$request->all();
-       foreach ($data_all as $data) {
+        $data_all = $request->all();
+        foreach ($data_all as $data) {
 
-               $validator = Validator::make($data, [
-                   'name' => ['required', 'min:10'],
-                   'email' => ['required', 'unique:users,email', 'email:rfc,dns'],
-                   'password' => ['required', 'min:8',],
-                   'country_id' => ['required', 'exists:countries:id']
-               ]
-           )->validate();
+            $validator = Validator::make($data, [
+                    'name' => ['required', 'min:10'],
+                    'email' => ['required', 'unique:users,email', 'email:rfc,dns'],
+                    'password' => ['required', 'min:8',],
+                    'country_id' => ['required', 'exists:countries:id']
+                ]
+            )->validate();
 
-           $data['password'] = Hash::make($data['password']);
+            $data['password'] = Hash::make($data['password']);
             $data['verify_token'] = Str::random(45);
-           $user = User::create($data);
+            $user = User::create($data);
             $queue = new \App\Jobs\VerifyEmail($user);
             $queue->onQueue('verifyEmail')->dispatch($user);
-       }
-        return response()->json(['status'=>'Ok','message'=>'Users saved']);
+        }
+        return response()->json(['status' => 'Ok', 'message' => 'Users saved']);
 
     }
 
@@ -88,12 +90,12 @@ class UserController extends Controller
      */
     public function update(Request $request): \Illuminate\Http\JsonResponse
     {
-       foreach ($request->all() as $data) {
+        foreach ($request->all() as $data) {
 
             $validator = Validator::make($data, [
-                    'id'=>['required', 'exists:users:id'],
+                    'id' => ['required', 'exists:users:id'],
                     'name' => ['required', 'min:10'],
-                    'email' => ['required', 'unique:users,email',$data['id'], 'email:rfc,dns'],
+                    'email' => ['required', 'unique:users,email', $data['id'], 'email:rfc,dns'],
                     'password' => ['required', 'min:8',],
                     'country_id' => ['required', 'exists:countries:id']
 
@@ -101,12 +103,12 @@ class UserController extends Controller
 
             )->validate();
 
-       $data['password'] = Hash::make($data['password']);
-        $user = User::find($data['id']);
-        $user->update($data);
-       }
+            $data['password'] = Hash::make($data['password']);
+            $user = User::find($data['id']);
+            $user->update($data);
+        }
 
-        return response()->json(['status'=>'Ok','message'=>'Users saved']);
+        return response()->json(['status' => 'Ok', 'message' => 'Users saved']);
     }
 
     /**
@@ -117,23 +119,60 @@ class UserController extends Controller
      */
     public function destroy(Request $request): \Illuminate\Http\JsonResponse
     {
-        $data=$request->json();
-            foreach ($data as $id){
-            $user=User::find($id);
+        $data = $request->json();
+        foreach ($data as $id) {
+            $user = User::find($id);
             $user->delete();
-                    }
-        return response()->json(['status'=>'Ok','message'=>'Users deleted']);
+        }
+        return response()->json(['status' => 'Ok', 'message' => 'Users deleted']);
     }
 
+    /**
+     * User's email verification.
+     *
+     * @param User $user , Request $request
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
 
-public function verify($user, Request $request){
-    $user=User::find($user);
-       $data = $request->only('token');
-          if($user->verify_token===$data['token']){
-          $user->email_verified_at = now();
-          $user->save();
 
-      }
-    return response()->json(['status'=>'Ok','message'=>'User verified']);
-}
+    public function verify(User $user, Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = User::find($user);
+        $data = $request->only('token');
+        if ($user->verify_token === $data['token']) {
+            $user->email_verified_at = now();
+            $user->save();
+
+        }
+        return response()->json(['status' => 'Ok', 'message' => 'User verified']);
+    }
+
+    /**
+     * User's identification.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+
+    public function authUser(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+            'device_name' => 'required',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided credentials are incorrect.'],
+            ]);
+        }
+
+        return $user->createToken($request->device_name)->plainTextToken;
+
+    }
+
 }

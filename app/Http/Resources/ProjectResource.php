@@ -21,7 +21,7 @@ class ProjectResource extends JsonResource
             'id'=>$this->id,
             'name'=>$this->name,
             'user'=>new UserResource(User::findOrFail($this->user->id)),
-            'linked_users'=> new UserCollection($this->linked_users),
+            'linked_users'=> new UserCollection($this->linkedUsers),
             'labels'=>new LabelCollection($this->labels),
             'created_at'=>$this->created_at,
             'updated_at'=>$this->updated_at,

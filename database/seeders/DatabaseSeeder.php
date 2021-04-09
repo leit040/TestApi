@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
 
 
         $countries = Country::all();
-        $users = \App\Models\User::factory(25)->make(['country_id' => null])->each(function ($user) use ($countries) {
+        $users = \App\Models\User::factory(5)->make(['country_id' => null])->each(function ($user) use ($countries) {
             $user->country_id = $countries->random()->id;
             $user->save();
         });
