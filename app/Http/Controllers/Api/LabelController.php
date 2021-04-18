@@ -50,18 +50,15 @@ class LabelController extends Controller
     {
 
         $data_all = $request->all();
-        foreach ($data_all as $data) {
 
-            $validator = Validator::make($data, [
-                    'name' => ['required', 'min:10', 'unique:projects,name'],
 
+            Validator::make($data_all, [
+                    '*.name' => ['required', 'min:10', 'unique:projects,name'],
                 ]
             )->validate();
-
+        foreach ($data_all as $data) {
             $data->user_id = Auth::id();
             Label::create($data);
-
-
         }
         return response()->json(['status' => 'Ok', 'message' => 'Label saved']);
 
@@ -79,14 +76,14 @@ class LabelController extends Controller
 
     public function update(Request $request): \Illuminate\Http\JsonResponse
     {
-        foreach ($request->all() as $data) {
-
-            $validator = Validator::make($data, [
-                'id' => ['required', 'exists:projects,id'],
-                'name' => ['required', 'min:10'],
+            Validator::make($request->all(), [
+                '*.id' => ['required', 'exists:projects,id'],
+                '*.name' => ['required', 'min:10'],
                         ])->validate();
 
+        foreach ($request->all() as $data) {
             $label = Label::find($data['id']);
+            abort_if($request->user()->cannot('update', $label), 403);
             $label->update($data);
         }
         return response()->json(['status' => 'Ok', 'message' => 'Label updated']);
@@ -102,9 +99,7 @@ class LabelController extends Controller
         $data = $request->json();
         foreach ($data as $id) {
             $label = Label::find($id);
-            if ($request->user()->cannot('delete', $label)) {
-                abort(403);
-            }
+            abort_if($request->user()->cannot('delete', $label), 403);
             $label->delete();
         }
         return response()->json(['status' => 'Ok', 'message' => 'Label deleted']);

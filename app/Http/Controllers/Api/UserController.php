@@ -57,18 +57,17 @@ class UserController extends Controller
      */
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
-
         $data_all = $request->all();
+        Validator::make($data_all, [
+                '*.name' => ['required', 'min:10'],
+                '*.email' => ['required', 'unique:users,email', 'email:rfc,dns'],
+                '*.password' => ['required', 'min:8',],
+                '*.country_id' => ['required', 'exists:countries:id']
+            ]
+        )->validate();
+
+
         foreach ($data_all as $data) {
-
-            $validator = Validator::make($data, [
-                    'name' => ['required', 'min:10'],
-                    'email' => ['required', 'unique:users,email', 'email:rfc,dns'],
-                    'password' => ['required', 'min:8',],
-                    'country_id' => ['required', 'exists:countries:id']
-                ]
-            )->validate();
-
             $data['password'] = Hash::make($data['password']);
             $data['verify_token'] = Str::random(45);
             $user = User::create($data);
@@ -90,24 +89,21 @@ class UserController extends Controller
      */
     public function update(Request $request): \Illuminate\Http\JsonResponse
     {
-        foreach ($request->all() as $data) {
 
-            $validator = Validator::make($data, [
-                    'id' => ['required', 'exists:users:id'],
-                    'name' => ['required', 'min:10'],
-                    'email' => ['required', 'unique:users,email', $data['id'], 'email:rfc,dns'],
-                    'password' => ['required', 'min:8',],
-                    'country_id' => ['required', 'exists:countries:id']
 
+            Validator::make($request->all(), [
+                    '*.id' => ['required', 'exists:users:id'],
+                    '*.name' => ['required', 'min:10'],
+                    '*.email' => ['required', 'unique:users,email', $request->all()['id'], 'email:rfc,dns'],
+                    '*.password' => ['required', 'min:8',],
+                    '*.country_id' => ['required', 'exists:countries:id']
                 ]
-
             )->validate();
-
+        foreach ($request->all() as $data) {
             $data['password'] = Hash::make($data['password']);
             $user = User::find($data['id']);
             $user->update($data);
         }
-
         return response()->json(['status' => 'Ok', 'message' => 'Users saved']);
     }
 
@@ -119,11 +115,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request): \Illuminate\Http\JsonResponse
     {
-        $data = $request->json();
-        foreach ($data as $id) {
-            $user = User::find($id);
-            $user->delete();
-        }
+        User::destroy($request->json());
         return response()->json(['status' => 'Ok', 'message' => 'Users deleted']);
     }
 
@@ -143,7 +135,6 @@ class UserController extends Controller
         if ($user->verify_token === $data['token']) {
             $user->email_verified_at = now();
             $user->save();
-
         }
         return response()->json(['status' => 'Ok', 'message' => 'User verified']);
     }
@@ -164,13 +155,11 @@ class UserController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->first();
-
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
         }
-
         return $user->createToken($request->device_name)->plainTextToken;
 
     }

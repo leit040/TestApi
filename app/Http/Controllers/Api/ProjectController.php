@@ -49,11 +49,15 @@ class ProjectController extends Controller
 
         }
         if ($request->has('continent')) {
-            $query->join('users', 'projects.user_id', '=', 'users.id')->
-            join('countries', 'users.country_id', '=', 'countries.id')->join('continents',
+            if ($request->has('email')){$query->join('countries', 'users.country_id', '=', 'countries.id')->join('continents',
                 'countries.continent_id', '=', 'continents.id')->
-            where('continents.id', '=', $request->get('continent'));
-
+            where('continents.id', '=', $request->get('continent'));}
+            else {
+                $query->join('users', 'projects.user_id', '=', 'users.id')->
+                join('countries', 'users.country_id', '=', 'countries.id')->join('continents',
+                    'countries.continent_id', '=', 'continents.id')->
+                where('continents.id', '=', $request->get('continent'));
+            }
         }
         return new ProjectCollection($query->get());
     }
@@ -91,12 +95,11 @@ class ProjectController extends Controller
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $data_all = $request->all();
-        foreach ($data_all as $data) {
-
-            $validator = Validator::make($data, [
-                    'name' => ['required', 'min:10', 'unique:projects,name'],
+            Validator::make($data_all, [
+            '*.name' => ['required', 'min:10', 'unique:projects,name'],
                                     ]
             )->validate();
+            foreach ($data_all as $data) {
             $data->user_id = Auth::id();
             $project = Project::create($data);
             $project->linked_users()->attach($data['user_id']);
@@ -164,17 +167,15 @@ class ProjectController extends Controller
      */
     public function update(Request $request): \Illuminate\Http\JsonResponse
     {
-        foreach ($request->all() as $data) {
 
-            $validator = Validator::make($data, [
-                'id' => ['required', 'exists:projects,id'],
-                'name' => ['required', 'min:10'],
+            Validator::make($request->all(), [
+                '*.id' => ['required', 'exists:projects,id'],
+                '*.name' => ['required', 'min:10'],
                 ])->validate();
 
+        foreach ($request->all() as $data) {
             $project = Project::find($data['id']);
-            if ($request->user()->cannot('update', $project)) {
-                abort(403);
-            }
+            abort_if($request->user()->cannot('update', $project), 403);
             $project->update($data);
         }
         return response()->json(['status' => 'Ok', 'message' => 'Projects saved']);
@@ -222,9 +223,7 @@ class ProjectController extends Controller
         $data = $request->json();
         foreach ($data as $id) {
             $project = Project::find($id);
-            if ($request->user()->cannot('delete', $project)) {
-                abort(403);
-            }
+            abort_if($request->user()->cannot('delete', $project), 403);
             $project->delete();
         }
         return response()->json(['status' => 'Ok', 'message' => 'Projects deleted']);
