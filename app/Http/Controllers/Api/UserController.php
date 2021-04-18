@@ -30,7 +30,7 @@ class UserController extends Controller
         $data = $request->all();
         if (isset($data['filter'])) {
             if (array_key_exists('is_verified', $data['filter'])) {
-                $query = User::query()->where('email_verified_at', '!=', null);
+                $query = User::query()->where('email_verified_at', 'IS NOT', null);
                 unset($data['filter']['is_verified']);
             } else {
                 $query = User::query();
