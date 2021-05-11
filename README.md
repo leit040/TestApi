@@ -1,62 +1,81 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400"></a></p>
+Test Task
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+Write a CRUD in Laravel.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+It should have 5 entities: Users, Projects, Labels, Countries & Continents.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Learning Laravel
+It should be possible to add multiple projects to multiple users and multiple labels to multiple projects.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+For example: 
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+User “John” has created a project “MyWebsite” and added labels “personal” & “wordpress” to it.
 
-## Laravel Sponsors
+User “Luis” has created a project “WorkProjectX” and added no labels.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+User “Happy” has projects “MyWebsite” and “WorkProjectX” linked.
 
-### Premium Partners
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/)**
-- **[OP.GG](https://op.gg)**
+Projects are visible if a user created it or has been linked to it, but can be only deleted by a user who created it.
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Labels are visible if a user created it or has a project linked with this label. Labels can be deleted only by a user who created it.
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+HTTP Methods:
 
-## Security Vulnerabilities
+    Users
+    Add users (create & add an email with verification token (plain text) to queue)
+    Verify user
+    List users (filter by name OR/AND email OR/AND verified OR/AND country)
+    Edit users
+    Delete users 
+    (HINT: Pay attention to “userS”: bulk actions)
+    Projects
+    Add projects
+    Link projects to users
+    List projects incl. labels (filter by user.email OR/AND user.continent OR/AND labels)
+    Delete projects
+    Labels
+    Add labels
+    Link labels to projects
+    List labels (filter by user.email OR/AND projects)
+    Delete labels
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
+Requirements:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Use Git with proper commit messages (Make a clean initial commit & multiple afterward)
+
+Use the latest stable Laravel version & follow its concepts
+
+Use MySQL database
+
+Add everything as Seed
+
+Use RabbitMQ or MySQL for queues
+
+Use Laravel’s Migrations (incl. Seeding), Models, Queues & Service Providers
+
+Pay attention to a good MySQL structure
+
+Try to follow good principles of PHP (and Laravel)
+
+NO FRONTEND required, only API (incl. DB)
+
+
+Entities:
+
+Users: Name, Email, Verified & Country (No Continent here please)
+
+(seed some example data, min. 10 rows)
+
+Projects: Name
+
+Labels: Name
+
+Countries: import from http://country.io/names.json 
+
+Continents: import from http://country.io/continent.json
